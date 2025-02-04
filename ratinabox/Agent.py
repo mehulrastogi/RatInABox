@@ -2,10 +2,10 @@ import ratinabox
 
 import copy
 import pprint
-import numpy as np
+import cupy as np
 import os
-import matplotlib
-from matplotlib import pyplot as plt
+# import matplotlib
+# from matplotlib import pyplot as plt
 import warnings
 
 
@@ -387,10 +387,7 @@ class Agent:
                 See paper for full details"""
 
                 spring_constant = v**2 / d**2
-                wall_accelerations = np.piecewise(
-                    x=x,
-                    condlist=[(x <= d),(x > d),],
-                    funclist=[lambda x: spring_constant * (d - x),lambda x: 0,],)
+                wall_accelerations = np.where(x <= d, spring_constant * (d - x), 0)
                 wall_acceleration_vecs = (
                     np.expand_dims(wall_accelerations, axis=-1)
                     * normalised_vectors_from_walls)
@@ -403,10 +400,7 @@ class Agent:
                 When the agent is < wall_repel_distance from the wall the agents position is updated as though it were on a conveyor belt which moves at the speed of spring mass attached to the wall with starting velocity 5*self.speed_mean.
                 This has a similar effect effect  as the spring model above in that the agent moves away from the wall BUT, crucially the update is made directly to the agents position, not it's speed, so the next time step will not reflect this update.
                 As a result the agent which is walking into the wall will continue to barge hopelessly into the wall causing it to "hug" close to the wall."""
-                wall_speeds = np.piecewise(
-                    x=x,
-                    condlist=[(x <= d),(x > d),],
-                    funclist=[lambda x: v * (1 - np.sqrt(1 - (d - x) ** 2 / d**2)),lambda x: 0,],)
+                wall_speeds = np.where(x <= d,v * (1 - np.sqrt(1 - (d - x) ** 2 / d**2)),0)
                 wall_speed_vecs = (
                     np.expand_dims(wall_speeds, axis=-1)
                     * normalised_vectors_from_walls)

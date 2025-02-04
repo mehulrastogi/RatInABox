@@ -2,9 +2,9 @@ import ratinabox
 
 import copy
 import pprint
-import numpy as np
-import matplotlib
-from matplotlib import pyplot as plt
+import cupy as np
+# import matplotlib
+# from matplotlib import pyplot as plt
 import shapely
 
 
@@ -793,7 +793,7 @@ class Environment:
 
         if self.dimensionality == "2D":
             if (
-                self.is_rectangular == True and self.holes is None
+                self.is_rectangular == True and (self.holes is None or len(self.holes) == 0)
             ):  # fast way (don't use shapely)
                 return all(
                     [
@@ -804,6 +804,9 @@ class Environment:
                     ]
                 )
             else:  # the slow way (polygon check for environment boundaries and each hole within env)
+                # TODO: This is not scalable to GPU. 
+                # shapely is not GPU compatible. cuSpatial is a potential solution 
+                # but it's not trivial to implement.
                 is_in = True
                 is_in *= self.boundary_polygon.contains(
                     shapely.Point(pos)

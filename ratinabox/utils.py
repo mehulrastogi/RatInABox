@@ -1,12 +1,12 @@
-import numpy as np
-import matplotlib
-from matplotlib import pyplot as plt
-import scipy
+import cupy as np
+# import matplotlib
+# from matplotlib import pyplot as plt
+import cupyx.scipy as scipy
 import inspect
 import os
 import warnings
 from datetime import datetime
-from scipy import stats as stats
+from cupyx.scipy import stats as stats
 from typing import Union
 import ratinabox
 
@@ -396,7 +396,7 @@ def interpolate_and_smooth(x, y, sigma=None, resolution_increase=10):
 
 def normal_to_rayleigh(x, sigma=1):
     """Converts a normally distributed variable (mean 0, var 1) to a rayleigh distributed variable (sigma)"""
-    x = stats.norm.cdf(x)  # norm to uniform)
+    x = 0.5 * (1 + scipy.special.erf(x / np.sqrt(2.0)))  # norm to uniform
     x = sigma * np.sqrt(-2 * np.log(1 - x))  # uniform to rayleigh
     return x
 
@@ -405,7 +405,7 @@ def rayleigh_to_normal(x, sigma=1):
     """Converts a rayleigh distributed variable (sigma) to a normally distributed variable (mean 0, var 1)"""
     x = 1 - np.exp(-(x**2) / (2 * sigma**2))  # rayleigh to uniform
     x = min(max(1e-6, x), 1 - 1e-6)
-    x = stats.norm.ppf(x)  # uniform to normal
+    x = np.sqrt(2) * scipy.special.erfinv(2 * x - 1)  # uniform to normal
     return x
 
 
