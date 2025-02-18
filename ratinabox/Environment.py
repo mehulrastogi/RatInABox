@@ -2,14 +2,18 @@ import ratinabox
 
 import copy
 import pprint
-import cupy as np
-# import matplotlib
-# from matplotlib import pyplot as plt
+import matplotlib
+from matplotlib import pyplot as plt
 import shapely
 
 
 import warnings
 from typing import Union, List
+
+if ratinabox.USE_CUPY:
+    import cupy as np
+else:
+    import numpy as np
 
 from ratinabox import utils
 from ratinabox.Agent import Agent

@@ -1,11 +1,17 @@
+import ratinabox
 from ratinabox.Environment import Environment
 from ratinabox.Neurons import Neurons
 import copy
-import numpy as np
+
 
 import torch #pytorch, for the neural network
 import torch.nn as nn
 import warnings
+
+if ratinabox.USE_CUPY:
+    import cupy as np
+else:
+    import numpy as np
 
 
 class NeuralNetworkNeurons(Neurons):
@@ -50,7 +56,7 @@ class NeuralNetworkNeurons(Neurons):
         # Check the number of output of the NeuralNetworkModule and self.n are compatible 
         # in order of preference...
         if (self.n is None) and (self.NeuralNetworkModule is not None): 
-            self.n = self.NeuralNetworkModule(torch.zeros(1,self.n_in)).shape[1]
+            self.n = self.NeuralNetworkModule(torch.zeros(1,self.n_in).cuda()).shape[1]
         
         elif (self.n is not None) and (self.NeuralNetworkModule is None):
             self.NeuralNetworkModule = MultiLayerPerceptron(n_in=self.n_in, n_out=self.n, n_hidden=[20,20])
@@ -65,7 +71,7 @@ class NeuralNetworkNeurons(Neurons):
 
         #Finally, check that the NeuralNetworkModule accepts the right sized inputs
         try:
-            self.NeuralNetworkModule(torch.zeros(1,self.n_in))
+            self.NeuralNetworkModule(torch.zeros(1,self.n_in).cuda())
         except: 
             raise ValueError(f"You provided inputs layers with a total of {self.n_in} neurons but the NeuralNetworkModule you provided does not accept inputs of size (1,{self.n_in}) so they are incompatible")
         
@@ -94,13 +100,18 @@ class NeuralNetworkNeurons(Neurons):
             #else kick the can down the road and just run get_state on all inputs and concatenate these
             # note the convention change of (n_batch, )
             inputs = np.concatenate([layer.get_state(evaluate_at, **kwargs) for layer in self.input_layers]).T
-        
-        inputs_torch = torch.Tensor(inputs.astype(np.float32))
+        # convert to torch tensor 
+        inputs = inputs.astype(np.float32)
+        if ratinabox.USE_CUPY:
+            inputs_torch = torch.as_tensor(inputs, device='cuda')
+        else:
+            inputs_torch = torch.Tensor(inputs)
         inputs_torch.requires_grad = True
         firingrate_torch = self.NeuralNetworkModule(inputs_torch) 
         if save_torch: 
             self.firingrate_torch = firingrate_torch # <-- note the shape convention on this in (n_batch, n_neurons, the opposite of RiaB standard
-        
+        if ratinabox.USE_CUPY:
+            return np.asarray(firingrate_torch.detach()).T
         return firingrate_torch.detach().numpy().T
 
 

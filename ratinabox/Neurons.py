@@ -3,13 +3,19 @@ import ratinabox
 import copy
 import warnings
 import pprint
-import cupy as np
-# import matplotlib
-# from matplotlib import pyplot as plt
-import cupyx.scipy as scipy
-from cupyx.scipy import stats as stats
+import matplotlib
+from matplotlib import pyplot as plt
 import warnings
-# from matplotlib.collections import EllipseCollection
+from matplotlib.collections import EllipseCollection
+
+if ratinabox.USE_CUPY:
+    import cupy as np
+    import cupyx.scipy as scipy
+    from cupyx.scipy import stats as stats
+else:
+    import numpy as np
+    import scipy
+    from scipy import stats as stats
 
 from ratinabox import utils
 

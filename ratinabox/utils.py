@@ -1,14 +1,25 @@
-import cupy as np
-# import matplotlib
-# from matplotlib import pyplot as plt
-import cupyx.scipy as scipy
+import ratinabox
+
+
+import matplotlib
+from matplotlib import pyplot as plt
+
 import inspect
 import os
 import warnings
 from datetime import datetime
-from cupyx.scipy import stats as stats
 from typing import Union
-import ratinabox
+
+
+if ratinabox.USE_CUPY:
+    import cupy as np
+    import cupyx.scipy as scipy
+    from cupyx.scipy import stats as stats
+else:
+    import numpy as np
+    import scipy
+    from scipy import stats as stats
+
 
 """OTHER USEFUL FUNCTIONS"""
 """Geometry functions"""

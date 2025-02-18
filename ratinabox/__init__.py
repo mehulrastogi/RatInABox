@@ -1,3 +1,5 @@
+USE_CUPY = True  # whether to use cupy for GPU acceleration or not
+
 verbose = False  # verbosity of ratinabox, recommend False unless debugging
 
 # SOME PLOT FORMATTING STUFF

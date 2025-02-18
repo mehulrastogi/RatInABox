@@ -4,7 +4,11 @@ from ratinabox.Neurons import *
 from ratinabox.utils import *
 
 import copy
-import numpy as np
+
+if ratinabox.USE_CUPY:
+    import cupy as np
+else:
+    import numpy as np
 
 
 class ValueNeuron(FeedForwardLayer):
